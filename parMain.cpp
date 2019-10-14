@@ -43,8 +43,7 @@ void generateBodies(std::vector<body> &bodies, int numBodies){
 // returns the rate (in millions of interactions / second)
 double standardThreeBody(std::vector<body> &bodies, int numIterations){
     auto start_time = std::chrono::high_resolution_clock::now();
-    #pragma omp parallel shared(bodies) private(i, j, x_diff, y_diff, 
-distance_squared, inverse_distance, product)
+    #pragma omp parallel shared(bodies) private(i, j, x_diff, y_diff, distance_squared, inverse_distance, product)
     {
     #pragma omp for schedule(static)
     for (auto i = bodies.begin(); i < bodies.end(); i++){
@@ -70,15 +69,12 @@ distance_squared, inverse_distance, product)
     }
 
     auto finish_time = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> time_span = (finish_time - 
-start_time);
-    double num_million_interactions = ((bodies.size() * (bodies.size() + 
-1)) / 2) / 1000000.0;
+    std::chrono::duration<double> time_span = (finish_time - start_time);
+    double num_million_interactions = ((bodies.size() * (bodies.size() + 1)) / 2) / 1000000.0;
     return (num_million_interactions / time_span.count());
 }
 
-// similar to standardThreeBody, but uses newton's third to reduce the 
-number 
+// similar to standardThreeBody, but uses newton's third to reduce the number 
 // of calculations
 double reducedThreeBody( std::vector<body> &bodies, int numIterations){
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -104,35 +100,29 @@ double reducedThreeBody( std::vector<body> &bodies, int numIterations){
     }
 
     auto finish_time = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> time_span = (finish_time - 
-start_time);
-    double num_million_interactions = ((bodies.size() * (bodies.size() + 
-1)) / 2) / 1000000.0;
+    std::chrono::duration<double> time_span = (finish_time - start_time);
+    double num_million_interactions = ((bodies.size() * (bodies.size() + 1)) / 2) / 1000000.0;
     return (num_million_interactions / time_span.count());
 }
 
 int main(){
 
     // std::vector<int> test_numbers = {15000};
-    std::vector<int> test_numbers = {10, 20, 50, 100, 200, 500, 1000, 
-2000, 5000, 10000};
+    std::vector<int> test_numbers = {10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
     std::vector<body> bodies;
     std::vector<double> standard_performances(test_numbers.size());
     std::vector<double> reduced_performances(test_numbers.size());
     int ind = 0;
     std::vector<body> standard_bodies;
     std::vector<body> reduced_bodies;
-    for (auto iter = test_numbers.begin(); iter < test_numbers.end(); 
-iter++){
+    for (auto iter = test_numbers.begin(); iter < test_numbers.end(); iter++){
         bodies.clear();
         bodies.resize(*iter);
         generateBodies(bodies, *iter);
         standard_bodies = bodies;
         reduced_bodies = bodies;
-        standard_performances[ind] = standardThreeBody(standard_bodies, 
-test_numbers[ind]);
-        reduced_performances[ind] = reducedThreeBody(reduced_bodies, 
-test_numbers[ind]);
+        standard_performances[ind] = standardThreeBody(standard_bodies, test_numbers[ind]);
+        reduced_performances[ind] = reducedThreeBody(reduced_bodies, test_numbers[ind]);
         ind += 1;
     }
 
@@ -151,12 +141,10 @@ test_numbers[ind]);
     }
 
     for (int i = 0; i < test_numbers.size(); i++){
-        out_benches << test_numbers[i] << "\t\t" << 
-standard_performances[i] << "\t\t"
+        out_benches << test_numbers[i] << "\t\t" << standard_performances[i] << "\t\t"
                 << reduced_performances[i] << std::endl;
     }
     out_benches.close();
     
     return 0;
-}    
-
+}
