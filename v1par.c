@@ -51,7 +51,7 @@ int main(int argc, char * argv[])
    */
  #pragma omp parallel shared(P) private(i)
 	{
-	   #pragma omp for schedule(static,10)
+	   #pragma omp for //schedule(static,10)
 	  for (i = 0; i < n; i++) {
 	    P[i].x = P[i].y = (double) i / (double) n;
 	    P[i].m = 1.0;
@@ -67,7 +67,7 @@ int main(int argc, char * argv[])
 t1 = omp_get_wtime();
  #pragma omp parallel shared(P) private(k,i,j)
 	{
-	   #pragma omp for schedule(static,10)
+	   #pragma omp for //schedule(static,10)
 	  for (k = 1; k <= nts; k++) {
 
 	    for (i = 0; i < n; i++) {
