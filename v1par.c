@@ -49,12 +49,16 @@ int main(int argc, char * argv[])
    * initial state: place n bodies along diagonal of unit square, 
    * each with unit mass and zero initial velocity and acceleration
    */
-  for (i = 0; i < n; i++) {
-    P[i].x = P[i].y = (double) i / (double) n;
-    P[i].m = 1.0;
-    P[i].vx = P[i].vy = 0.0;
-    P[i].ax = P[i].ay = 0.0;
-  }
+ #pragma omp parallel shared(P) private(i)
+	{
+	   #pragma omp for schedule(static,10)
+	  for (i = 0; i < n; i++) {
+	    P[i].x = P[i].y = (double) i / (double) n;
+	    P[i].m = 1.0;
+	    P[i].vx = P[i].vy = 0.0;
+	    P[i].ax = P[i].ay = 0.0;
+	  }
+	}
 
 
   /*
