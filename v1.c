@@ -26,9 +26,10 @@ struct Body {
  */
 static struct Body P[NMAX];
 
-double G      = 6.673E-11;
+// double G      = 6.673E-11;
+double G = 1;
 double DeltaT = 0.001;
-int    nts    = 4;     // number of time steps
+int    nts    = 6;     // number of time steps
 int    n;              // number of bodies
 
 
@@ -113,7 +114,7 @@ int main(int argc, char * argv[])
     double interactions = nts*n*n;
     double dt = t2 - t1;
     printf("   %6d    %.5g \n", n, 1E-6 * interactions / dt);
-    printf("   %lf, %lf", p[0].x, p[0].y)
-    printf("   %lf, %lf", p[1].x, p[1].y)
+    fprintf(stderr, "   %lf, %lf", P[0].x, P[0].y);
+    fprintf(stderr, "   %lf, %lf", P[1].x, P[1].y);
   }
 }

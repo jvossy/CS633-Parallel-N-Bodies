@@ -7,8 +7,8 @@
 #include <omp.h>
 
 
-const double G = 0.00000000006673;
-// const double G = 1;
+// const double G = 0.00000000006673;
+const double G = 1;
 
 // const double timestep = 1.0;
 const double timestep = 0.001;
@@ -73,6 +73,8 @@ double standardThreeBody(std::vector<body> &bodies, int numIterations){
         i->vY += i->aY * timestep;
     }
 
+    std::cout << bodies[0].pX << ", " << bodies[0].pY << '\t';
+    std::cout << bodies[1].pX << ", " << bodies[1].pY <<std::endl;
     t2 = omp_get_wtime();
     double time_diff = t2 -t1;
     double num_million_interactions = ((bodies.size() * (bodies.size()))  * numIterations) / 1000000.0;
