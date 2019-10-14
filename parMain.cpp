@@ -44,25 +44,25 @@ void generateBodies(std::vector<body> &bodies, int numBodies){
 double standardThreeBody(std::vector<body> &bodies, int numIterations){
     auto start_time = std::chrono::high_resolution_clock::now();
     #pragma omp parallel shared(bodies) private(i, j, x_diff, y_diff, distance_squared, inverse_distance, product)
-    {
-    #pragma omp for schedule(static)
-    for (auto i = bodies.begin(); i < bodies.end(); i++){
-        for (auto j = bodies.begin(); j < bodies.end(); j++){
-            if(i == j){
-                continue;
-            }
-            double x_diff = (j->pX - i->pX);
-            double y_diff = (j->pY - i->pY);
-            double distance_squared = x_diff * x_diff + y_diff * y_diff;
-            double inverse_distance = 1.0 / sqrt(distance_squared);
+        {
+        #pragma omp for schedule(static)
+            for (auto i = bodies.begin(); i < bodies.end(); i++){
+                for (auto j = bodies.begin(); j < bodies.end(); j++){
+                    if(i == j){
+                        continue;
+                    }
+                    double x_diff = (j->pX - i->pX);
+                    double y_diff = (j->pY - i->pY);
+                    double distance_squared = x_diff * x_diff + y_diff * y_diff;
+                    double inverse_distance = 1.0 / sqrt(distance_squared);
 
-            // update by acceleration times time interval
-            double product = G * j->mass * timestep / distance_squared;
-            i->vX += x_diff * product * inverse_distance;
-            i->vY += y_diff * product * inverse_distance;
-        }
-    }
-    }
+                    // update by acceleration times time interval
+                    double product = G * j->mass * timestep / distance_squared;
+                    i->vX += x_diff * product * inverse_distance;
+                    i->vY += y_diff * product * inverse_distance;
+                }
+            }
+        }/* end of parallel region */
     for (auto i = bodies.begin(); i < bodies.end(); i++){
         i->pX += i->vX * timestep;
         i->pY += i->vY * timestep;        
