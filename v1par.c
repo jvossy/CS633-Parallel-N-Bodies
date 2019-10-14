@@ -64,51 +64,54 @@ int main(int argc, char * argv[])
   /*
    *  n-body simulation for nts steps
    */
-  t1 = omp_get_wtime();
-  for (k = 1; k <= nts; k++) {
+ #pragma omp parallel shared(P) private(k,i,j)
+	{
+	   #pragma omp for schedule(static,10)
+	  t1 = omp_get_wtime();
+	  for (k = 1; k <= nts; k++) {
 
-    for (i = 0; i < n; i++) {
+	    for (i = 0; i < n; i++) {
 
-      /*  force accumulator for body i
-       */
-      double fx = 0.0;
-      double fy = 0.0;
+	      /*  force accumulator for body i
+	       */
+	      double fx = 0.0;
+	      double fy = 0.0;
 
-      /*  interact with all bodies (except self)
-       */
-      for (j = 0 ; j < n;  j++) {
+	      /*  interact with all bodies (except self)
+	       */
+	      for (j = 0 ; j < n;  j++) {
 
-	if (j != i) { 
-	  double rx, ry, d, d3, c;
-	  
-	  /* direct transcription of f_ij 
-	   */
-	  rx = P[j].x - P[i].x;   
-	  ry = P[j].y - P[i].y;
-	  d  = sqrt((rx * rx) + (ry * ry));
-	  d3 = pow(d,3.0);
-	  fx += G * P[i].m * P[j].m * rx / d3;
-	  fy += G * P[i].m * P[j].m * ry / d3;
-	} /* if */
+		if (j != i) { 
+		  double rx, ry, d, d3, c;
 
-      }/* for j */
+		  /* direct transcription of f_ij 
+		   */
+		  rx = P[j].x - P[i].x;   
+		  ry = P[j].y - P[i].y;
+		  d  = sqrt((rx * rx) + (ry * ry));
+		  d3 = pow(d,3.0);
+		  fx += G * P[i].m * P[j].m * rx / d3;
+		  fy += G * P[i].m * P[j].m * ry / d3;
+		} /* if */
 
-      P[i].ax = fx / P[i].m;
-      P[i].ay = fy / P[i].m;
+	      }/* for j */
 
-    }/* for i */
+	      P[i].ax = fx / P[i].m;
+	      P[i].ay = fy / P[i].m;
 
-    /* update velocities and positions 
-     */
-    for (i = 0; i < n; i++) {
-      P[i].x  += P[i].vx * DeltaT;
-      P[i].y  += P[i].vy * DeltaT;
-      P[i].vx += P[i].ax * DeltaT; 
-      P[i].vy += P[i].ay * DeltaT; 
-    }
+	    }/* for i */
 
-  } /* for k */
+	    /* update velocities and positions 
+	     */
+	    for (i = 0; i < n; i++) {
+	      P[i].x  += P[i].vx * DeltaT;
+	      P[i].y  += P[i].vy * DeltaT;
+	      P[i].vx += P[i].ax * DeltaT; 
+	      P[i].vy += P[i].ay * DeltaT; 
+	    }
 
+	  } /* for k */
+	}/*End parallel*/
   t2 = omp_get_wtime();
 
   /* report result in units of millions of interactions per second 
