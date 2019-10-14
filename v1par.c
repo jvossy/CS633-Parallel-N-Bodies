@@ -26,10 +26,9 @@ struct Body {
  */
 static struct Body P[NMAX];
 
-// double G      = 6.673E-11;
-double G = 1;
+double G      = 6.673E-11;
 double DeltaT = 0.001;
-int    nts    = 6;     // number of time steps
+int    nts    = 4;     // number of time steps
 int    n;              // number of bodies
 
 
@@ -50,12 +49,16 @@ int main(int argc, char * argv[])
    * initial state: place n bodies along diagonal of unit square, 
    * each with unit mass and zero initial velocity and acceleration
    */
-  for (i = 0; i < n; i++) {
-    P[i].x = P[i].y = (double) i / (double) n;
-    P[i].m = 1.0;
-    P[i].vx = P[i].vy = 0.0;
-    P[i].ax = P[i].ay = 0.0;
-  }
+ #pragma omp parallel shared(P) private(i)
+	{
+	   #pragma omp for schedule(static,10)
+	  for (i = 0; i < n; i++) {
+	    P[i].x = P[i].y = (double) i / (double) n;
+	    P[i].m = 1.0;
+	    P[i].vx = P[i].vy = 0.0;
+	    P[i].ax = P[i].ay = 0.0;
+	  }
+	}
 
 
   /*
@@ -75,18 +78,18 @@ int main(int argc, char * argv[])
        */
       for (j = 0 ; j < n;  j++) {
 
-        if (j != i) { 
-          double rx, ry, d, d3, c;
-          
-          /* direct transcription of f_ij 
-          */
-          rx = P[j].x - P[i].x;   
-          ry = P[j].y - P[i].y;
-          d  = sqrt((rx * rx) + (ry * ry));
-          d3 = pow(d,3.0);
-          fx += G * P[i].m * P[j].m * rx / d3;
-          fy += G * P[i].m * P[j].m * ry / d3;
-        } /* if */
+	if (j != i) { 
+	  double rx, ry, d, d3, c;
+	  
+	  /* direct transcription of f_ij 
+	   */
+	  rx = P[j].x - P[i].x;   
+	  ry = P[j].y - P[i].y;
+	  d  = sqrt((rx * rx) + (ry * ry));
+	  d3 = pow(d,3.0);
+	  fx += G * P[i].m * P[j].m * rx / d3;
+	  fy += G * P[i].m * P[j].m * ry / d3;
+	} /* if */
 
       }/* for j */
 
@@ -113,9 +116,6 @@ int main(int argc, char * argv[])
   {
     double interactions = nts*n*n;
     double dt = t2 - t1;
-    printf("   %6d    %.5g \n", n, 1E-6 * interactions / dt);
-    fprintf(stderr, "   %lf, %lf", P[0].x, P[0].y);
-    fprintf(stderr, "   %lf, %lf", P[1].x, P[1].y);
-
+    printf("   %6d    %.5g \n", n, 1E-6 * interactions / dt); 
   }
 }
