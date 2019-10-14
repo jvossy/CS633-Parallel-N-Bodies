@@ -67,7 +67,7 @@ int main(int argc, char * argv[])
 t1 = omp_get_wtime();
  #pragma omp parallel shared(P) private(k,i,j)
 	{
-	   #pragma omp for schedule(static ,5)
+	   #pragma omp for schedule(static ,2)
 	  for (k = 1; k <= nts; k++) {
 
 	    for (i = 0; i < n; i++) {
