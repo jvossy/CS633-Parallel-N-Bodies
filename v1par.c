@@ -64,10 +64,10 @@ int main(int argc, char * argv[])
   /*
    *  n-body simulation for nts steps
    */
+t1 = omp_get_wtime();
  #pragma omp parallel shared(P) private(k,i,j)
 	{
 	   #pragma omp for schedule(static,10)
-	  t1 = omp_get_wtime();
 	  for (k = 1; k <= nts; k++) {
 
 	    for (i = 0; i < n; i++) {
