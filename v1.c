@@ -74,18 +74,18 @@ int main(int argc, char * argv[])
        */
       for (j = 0 ; j < n;  j++) {
 
-	if (j != i) { 
-	  double rx, ry, d, d3, c;
-	  
-	  /* direct transcription of f_ij 
-	   */
-	  rx = P[j].x - P[i].x;   
-	  ry = P[j].y - P[i].y;
-	  d  = sqrt((rx * rx) + (ry * ry));
-	  d3 = pow(d,3.0);
-	  fx += G * P[i].m * P[j].m * rx / d3;
-	  fy += G * P[i].m * P[j].m * ry / d3;
-	} /* if */
+        if (j != i) { 
+          double rx, ry, d, d3, c;
+          
+          /* direct transcription of f_ij 
+          */
+          rx = P[j].x - P[i].x;   
+          ry = P[j].y - P[i].y;
+          d  = sqrt((rx * rx) + (ry * ry));
+          d3 = pow(d,3.0);
+          fx += G * P[i].m * P[j].m * rx / d3;
+          fy += G * P[i].m * P[j].m * ry / d3;
+        } /* if */
 
       }/* for j */
 

@@ -4,6 +4,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream> 
+#include <omp.h>
 
 
 const double G = 0.00000000006673;
@@ -21,6 +22,8 @@ struct body {
     double pY;   
     double vX;
     double vY;
+    double aX;
+    double aY;
 };
 
 // places numBodies uniformly spaced along a line from 0 to 1
@@ -33,6 +36,9 @@ void generateBodies(std::vector<body> &bodies, int numBodies){
         i->mass = kMASS;
         i->vX = 0.0;
         i->vY = 0.0;
+        i->aX = 0.0;
+        i->aY = 0.0;
+
         i->pX = xcur;
         i->pY = ycur;
         xcur += xStep;
@@ -42,8 +48,8 @@ void generateBodies(std::vector<body> &bodies, int numBodies){
 
 // returns the rate (in millions of interactions / second)
 double standardThreeBody(std::vector<body> &bodies, int numIterations){
-    auto start_time = std::chrono::high_resolution_clock::now();
-
+    double t1,t2;
+    t1 = omp_get_wtime();
     for (auto i = bodies.begin(); i < bodies.end(); i++){
         for (auto j = bodies.begin(); j < bodies.end(); j++){
             if(i == j){
@@ -51,61 +57,66 @@ double standardThreeBody(std::vector<body> &bodies, int numIterations){
             }
             double x_diff = (j->pX - i->pX);
             double y_diff = (j->pY - i->pY);
-            double distance_squared = x_diff * x_diff + y_diff * y_diff;
-            double inverse_distance = 1.0 / sqrt(distance_squared);
+            double distance_cubed = pow(x_diff * x_diff + y_diff * y_diff, 1.5);
 
             // update by acceleration times time interval
-            double product = G * j->mass * timestep / distance_squared;
-            i->vX += x_diff * product * inverse_distance;
-            i->vY += y_diff * product * inverse_distance;
+            double product = G * j->mass / distance_cubed;
+            i->aX += x_diff * product;
+            i->aY += y_diff * product;
         }
+
     }
     for (auto i = bodies.begin(); i < bodies.end(); i++){
         i->pX += i->vX * timestep;
-        i->pY += i->vY * timestep;        
+        i->pY += i->vY * timestep;
+        i->vX += i->aX * timestep;
+        i->vY += i->aY * timestep;
     }
 
-    auto finish_time = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> time_span = (finish_time - start_time);
-    double num_million_interactions = ((bodies.size() * (bodies.size() + 1)) / 2) / 1000000.0;
-    return (num_million_interactions / time_span.count());
+    t2 = omp_get_wtime();
+    double time_diff = t2 -t1;
+    double num_million_interactions = ((bodies.size() * (bodies.size()))  * numIterations) / 1000000.0;
+    return (num_million_interactions / time_diff);
 }
 
 // similar to standardThreeBody, but uses newton's third to reduce the number 
 // of calculations
 double reducedThreeBody( std::vector<body> &bodies, int numIterations){
-    auto start_time = std::chrono::high_resolution_clock::now();
+    double t1,t2;
+    t1 = omp_get_wtime();
     for (auto i = bodies.begin(); i < bodies.end(); i++){
         for (auto j = i+1; j < bodies.end(); j++){
+
             double x_diff = (j->pX - i->pX);
             double y_diff = (j->pY - i->pY);
-            double distance_squared = x_diff * x_diff + y_diff * y_diff;
-            double inverse_distance = 1.0 / sqrt(distance_squared);
+            double distance_cubed = pow(x_diff * x_diff + y_diff * y_diff, 1.5);
             // update by acceleration times time interval
-            double product = G * timestep / distance_squared;
+            double product = G / distance_cubed;
             double productj = -1.0 * i->mass * product;
             double producti = j->mass * product;
-            i->vX += x_diff * producti * inverse_distance;
-            i->vY += y_diff * producti * inverse_distance;
-            j->vX += x_diff * productj * inverse_distance;
-            j->vY += y_diff * productj * inverse_distance;
+            i->aX += x_diff * producti;
+            i->aY += y_diff * producti;
+            j->aX += x_diff * productj;
+            j->aY += y_diff * productj;
         }
     }
     for (auto i = bodies.begin(); i < bodies.end(); i++){
         i->pX += i->vX * timestep;
         i->pY += i->vY * timestep;
+        i->vX += i->aX * timestep;
+        i->vY += i->aY * timestep;
     }
 
-    auto finish_time = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> time_span = (finish_time - start_time);
-    double num_million_interactions = ((bodies.size() * (bodies.size() + 1)) / 2) / 1000000.0;
-    return (num_million_interactions / time_span.count());
+    t2 = omp_get_wtime();
+    double time_diff = t2 -t1;
+    double num_million_interactions = ((bodies.size() * (bodies.size()))  * numIterations) / 1000000.0;
+    return (num_million_interactions / time_diff);
 }
 
 int main(){
 
     // std::vector<int> test_numbers = {15000};
-    std::vector<int> test_numbers = {10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
+    std::vector<int> test_numbers = {10, 20, 50, 100, 200, 500, 1000};//, 2000, 5000, 10000};
     std::vector<body> bodies;
     std::vector<double> standard_performances(test_numbers.size());
     std::vector<double> reduced_performances(test_numbers.size());
@@ -118,8 +129,8 @@ int main(){
         generateBodies(bodies, *iter);
         standard_bodies = bodies;
         reduced_bodies = bodies;
-        standard_performances[ind] = standardThreeBody(standard_bodies, test_numbers[ind]);
-        reduced_performances[ind] = reducedThreeBody(reduced_bodies, test_numbers[ind]);
+        standard_performances[ind] = standardThreeBody(standard_bodies, 4);
+        reduced_performances[ind] = reducedThreeBody(reduced_bodies, 4);
         ind += 1;
     }
 
