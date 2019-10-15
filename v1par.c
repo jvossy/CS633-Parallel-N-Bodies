@@ -51,7 +51,7 @@ int main(int argc, char * argv[])
    */
  #pragma omp parallel shared(P) private(i)
 	{
-	   #pragma omp for //schedule(static,10)
+	   #pragma omp for schedule(guided)
 	  for (i = 0; i < n; i++) {
 	    P[i].x = P[i].y = (double) i / (double) n;
 	    P[i].m = 1.0;
