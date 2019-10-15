@@ -84,17 +84,17 @@ int main(int argc, char * argv[])
         c  = P[j].m * P[i].m / (d2 * sqrt(d2));           
         Fx += c * rx;              
         Fy += c * ry;  
-        #pragma omp atomic write
+        #pragma omp atomic
         P[j].fx -= c * rx;  // reciprocal interaction
-        #pragma omp atomic write
+        #pragma omp atomic
         P[j].fy -= c * ry;             
 
         } /* j */
 	//Lock P[i]
-      #pragma omp atomic write
+      #pragma omp atomic
       P[i].fx +=  Fx;
-      
-      #pragma omp atomic write
+
+      #pragma omp atomic
       P[i].fy +=  Fy;
 	//Unlock P[i]
     } /* i */
@@ -121,7 +121,7 @@ int main(int argc, char * argv[])
   {
     double interactions = nts * (double) n * (double) n;
     double dt = t2 - t1;
-    printf("   %6d    %.5g \n", n, 1E-6 * interactions / dt); 
+    printf("%.5g \n",1E-6 * interactions / dt); 
   }
 
 } 

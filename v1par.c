@@ -121,6 +121,6 @@ for (k = 1; k <= nts; k++) {
   {
     double interactions = nts*n*n;
     double dt = t2 - t1;
-    printf("   %6d    %.5g \n", n, 1E-6 * interactions / dt); 
+    printf("%.5g \n", 1E-6 * interactions / dt); 
   }
 }
