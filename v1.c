@@ -113,8 +113,6 @@ int main(int argc, char * argv[])
     double interactions = nts*n*n;
     double dt = t2 - t1;
     printf("   %6d    %.5g \n", n, 1E-6 * interactions / dt);
-    fprintf(stderr, "   %lf, %lf", P[0].x, P[0].y);
-    fprintf(stderr, "   %lf, %lf", P[1].x, P[1].y);
 
   }
   FILE *f = fopen("v1state.data", "wb");
