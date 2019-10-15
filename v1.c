@@ -29,7 +29,7 @@ static struct Body P[NMAX];
 // double G      = 6.673E-11;
 double G = 1;
 double DeltaT = 0.001;
-int    nts    = 6;     // number of time steps
+int    nts    = 4;     // number of time steps
 int    n;              // number of bodies
 
 

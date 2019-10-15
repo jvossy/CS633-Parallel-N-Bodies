@@ -28,7 +28,7 @@ static struct Body P[NMAX];
 
 double G      = 6.673E-11;
 double DeltaT = 0.001;
-int    nts    = 4;     // number of time steps
+int    nts    = 6;     // number of time steps
 int    n;              // number of bodies
 
 
@@ -67,7 +67,7 @@ int main(int argc, char * argv[])
 t1 = omp_get_wtime();
  #pragma omp parallel shared(P) private(k,i,j)
 	{
-	   #pragma omp for schedule(static,10)
+	   #pragma omp for //schedule(static,10)
 	  for (k = 1; k <= nts; k++) {
 
 	    for (i = 0; i < n; i++) {

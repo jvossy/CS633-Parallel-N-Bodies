@@ -7,8 +7,8 @@
 #include <omp.h>
 
 
-// const double G = 0.00000000006673;
-const double G = 1;
+const double G = 0.00000000006673;
+// const double G = 1;
 
 // const double timestep = 1.0;
 const double timestep = 0.001;
@@ -50,28 +50,32 @@ void generateBodies(std::vector<body> &bodies, int numBodies){
 double standardThreeBody(std::vector<body> &bodies, int numIterations){
     double t1,t2;
     t1 = omp_get_wtime();
-    for (auto i = bodies.begin(); i < bodies.end(); i++){
-        for (auto j = bodies.begin(); j < bodies.end(); j++){
-            if(i == j){
-                continue;
+    for (int iter = 0; iter < numIterations; iter++){
+        for (auto i = bodies.begin(); i < bodies.end(); i++){
+            for (auto j = bodies.begin(); j < bodies.end(); j++){
+                if(i == j){
+                    continue;
+                }
+                double x_diff = (j->pX - i->pX);
+                double y_diff = (j->pY - i->pY);
+                double distance_cubed = pow(x_diff * x_diff + y_diff * y_diff, 1.5);
+
+                // update by acceleration times time interval
+                double product = G * j->mass / distance_cubed;
+                i->aX += x_diff * product;
+                i->aY += y_diff * product;
             }
-            double x_diff = (j->pX - i->pX);
-            double y_diff = (j->pY - i->pY);
-            double distance_cubed = pow(x_diff * x_diff + y_diff * y_diff, 1.5);
 
-            // update by acceleration times time interval
-            double product = G * j->mass / distance_cubed;
-            i->aX += x_diff * product;
-            i->aY += y_diff * product;
         }
+        for (auto i = bodies.begin(); i < bodies.end(); i++){
+            i->pX += i->vX * timestep;
+            i->pY += i->vY * timestep;
+            i->vX += i->aX * timestep;
+            i->vY += i->aY * timestep;
+        }
+    }
+    
 
-    }
-    for (auto i = bodies.begin(); i < bodies.end(); i++){
-        i->pX += i->vX * timestep;
-        i->pY += i->vY * timestep;
-        i->vX += i->aX * timestep;
-        i->vY += i->aY * timestep;
-    }
 
     std::cout << bodies[0].pX << ", " << bodies[0].pY << '\t';
     std::cout << bodies[1].pX << ", " << bodies[1].pY <<std::endl;
@@ -86,28 +90,31 @@ double standardThreeBody(std::vector<body> &bodies, int numIterations){
 double reducedThreeBody( std::vector<body> &bodies, int numIterations){
     double t1,t2;
     t1 = omp_get_wtime();
-    for (auto i = bodies.begin(); i < bodies.end(); i++){
-        for (auto j = i+1; j < bodies.end(); j++){
+    for (int iter = 0; iter < numIterations; iter++){
+        for (auto i = bodies.begin(); i < bodies.end(); i++){
+            for (auto j = i+1; j < bodies.end(); j++){
 
-            double x_diff = (j->pX - i->pX);
-            double y_diff = (j->pY - i->pY);
-            double distance_cubed = pow(x_diff * x_diff + y_diff * y_diff, 1.5);
-            // update by acceleration times time interval
-            double product = G / distance_cubed;
-            double productj = -1.0 * i->mass * product;
-            double producti = j->mass * product;
-            i->aX += x_diff * producti;
-            i->aY += y_diff * producti;
-            j->aX += x_diff * productj;
-            j->aY += y_diff * productj;
+                double x_diff = (j->pX - i->pX);
+                double y_diff = (j->pY - i->pY);
+                double distance_cubed = pow(x_diff * x_diff + y_diff * y_diff, 1.5);
+                // update by acceleration times time interval
+                double product = G / distance_cubed;
+                double productj = -1.0 * i->mass * product;
+                double producti = j->mass * product;
+                i->aX += x_diff * producti;
+                i->aY += y_diff * producti;
+                j->aX += x_diff * productj;
+                j->aY += y_diff * productj;
+            }
+        }
+        for (auto i = bodies.begin(); i < bodies.end(); i++){
+            i->pX += i->vX * timestep;
+            i->pY += i->vY * timestep;
+            i->vX += i->aX * timestep;
+            i->vY += i->aY * timestep;
         }
     }
-    for (auto i = bodies.begin(); i < bodies.end(); i++){
-        i->pX += i->vX * timestep;
-        i->pY += i->vY * timestep;
-        i->vX += i->aX * timestep;
-        i->vY += i->aY * timestep;
-    }
+
 
     t2 = omp_get_wtime();
     double time_diff = t2 -t1;
