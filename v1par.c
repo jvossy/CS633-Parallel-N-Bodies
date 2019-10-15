@@ -99,17 +99,20 @@ for (k = 1; k <= nts; k++) {
 	      P[i].ay = fy / P[i].m;
 
 	    }/* for i */
-
-	    /* update velocities and positions 
-	     */
-	    for (i = 0; i < n; i++) {
-	      P[i].x  += P[i].vx * DeltaT;
-	      P[i].y  += P[i].vy * DeltaT;
-	      P[i].vx += P[i].ax * DeltaT; 
-	      P[i].vy += P[i].ay * DeltaT; 
-	    }
-	   }/*End parallel*/
-	 } /* for k */
+	 }/*End parallel*/
+    /* update velocities and positions 
+     */
+ #pragma omp parallel shared(P) private(k,i,j)
+	{
+	   #pragma omp for schedule(guided)
+    for (i = 0; i < n; i++) {
+      P[i].x  += P[i].vx * DeltaT;
+      P[i].y  += P[i].vy * DeltaT;
+      P[i].vx += P[i].ax * DeltaT; 
+      P[i].vy += P[i].ay * DeltaT; 
+    }
+   }/*End parallel*/
+ } /* for k */
   t2 = omp_get_wtime();
 
   /* report result in units of millions of interactions per second 
