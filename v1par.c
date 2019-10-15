@@ -123,4 +123,10 @@ for (k = 1; k <= nts; k++) {
     double dt = t2 - t1;
     printf("%.5g \n", 1E-6 * interactions / dt); 
   }
+/*write out to file*/
+  FILE *f = fopen("v1parstate.data", "wb");
+  for (i = 0; i < n; i++) {
+    fprintf(f, "x: %.20f, y: %.20f\n", P[i].x, P[i].y); 
+  }
+  fclose(f);
 }
