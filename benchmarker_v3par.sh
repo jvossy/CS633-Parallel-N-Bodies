@@ -10,6 +10,7 @@ do
     for num_threads in 1 4 8 16 18 20
     do
         sum=0
+        export OMP_NUM_THREADS=$num_threads
         for iter in {1..10}
         do
             sum=$(echo "${sum}+$(./v3npar $i )"    | bc -l)
