@@ -65,11 +65,10 @@ int main(int argc, char * argv[])
    *  n-body simulation for nts steps
    */
 t1 = omp_get_wtime();
+for (k = 1; k <= nts; k++) {
  #pragma omp parallel shared(P) private(k,i,j)
 	{
 	   #pragma omp for schedule(dynamic)
-	  for (k = 1; k <= nts; k++) {
-
 	    for (i = 0; i < n; i++) {
 
 	      /*  force accumulator for body i
@@ -109,9 +108,8 @@ t1 = omp_get_wtime();
 	      P[i].vx += P[i].ax * DeltaT; 
 	      P[i].vy += P[i].ay * DeltaT; 
 	    }
-
-	  } /* for k */
-	}/*End parallel*/
+	   }/*End parallel*/
+	 } /* for k */
   t2 = omp_get_wtime();
 
   /* report result in units of millions of interactions per second 
