@@ -26,8 +26,7 @@ struct Body {
  */
 static struct Body P[NMAX];
 
-// double G      = 6.673E-11;
-double G = 1;
+double G      = 6.673E-11;
 double DeltaT = 0.001;
 int    nts    = 4;     // number of time steps
 int    n;              // number of bodies
@@ -118,4 +117,8 @@ int main(int argc, char * argv[])
     fprintf(stderr, "   %lf, %lf", P[1].x, P[1].y);
 
   }
+  FILE *f = fopen("v1state.data", "wb");
+  fwrite(P, sizeof(char), sizeof(P), f); 
+  fclose(f);
 }
+
