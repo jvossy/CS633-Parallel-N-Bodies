@@ -68,7 +68,7 @@ t1 = omp_get_wtime();
 for (k = 1; k <= nts; k++) {
  #pragma omp parallel shared(P) private(k,i,j)
 	{
-	   #pragma omp for schedule(dynamic)
+	   #pragma omp for schedule(static)
 	    for (i = 0; i < n; i++) {
 
 	      /*  force accumulator for body i
