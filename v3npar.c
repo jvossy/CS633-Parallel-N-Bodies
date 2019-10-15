@@ -60,8 +60,11 @@ int main(int argc, char * argv[])
    *  n-body simulation for nts steps
    */
   t1 = omp_get_wtime();
-  for (k = 1; k <= nts; k++) {
 
+  for (k = 1; k <= nts; k++) {
+ #pragma omp parallel shared(P) private(i, j)
+   {
+   #pragma omp for schedule(guided)
     for (i = 0; i < n; i++) {
 
       double Fx = 0.0, Fy = 0.0;
@@ -71,28 +74,36 @@ int main(int argc, char * argv[])
        */
       for (j = i + 1; j < n;  j++) {
 
-	  double rx, ry, d2, d, c;
-	  
-	  /* interaction caluclation
-	   */
-	  rx = P[j].x - P[i].x;   
-	  ry = P[j].y - P[i].y;   
-	  d2 = (rx * rx) + (ry * ry);
-	  c  = P[j].m * P[i].m / (d2 * sqrt(d2));           
-	  Fx += c * rx;              
-	  Fy += c * ry;  
-	  P[j].fx -= c * rx;  // reciprocal interaction
-	  P[j].fy -= c * ry;             
+        double rx, ry, d2, d, c;
+        
+        /* interaction caluclation
+        */
+        rx = P[j].x - P[i].x;   
+        ry = P[j].y - P[i].y;   
+        d2 = (rx * rx) + (ry * ry);
+        c  = P[j].m * P[i].m / (d2 * sqrt(d2));           
+        Fx += c * rx;              
+        Fy += c * ry;  
+        #pragma omp atomic write
+        P[j].fx -= c * rx;  // reciprocal interaction
+        #pragma omp atomic write
+        P[j].fy -= c * ry;             
 
-      } /* j */
-
+        } /* j */
+	//Lock P[i]
+      #pragma omp atomic write
       P[i].fx +=  Fx;
+      
+      #pragma omp atomic write
       P[i].fy +=  Fy;
-
+	//Unlock P[i]
     } /* i */
-
+   }/* End Parallel */
     /* advance velocities and positions 
      */
+ #pragma omp parallel shared(P) private(i, j)
+   {
+   #pragma omp for schedule(guided)
     for (i = 0; i < n; i++) {
       P[i].x  += P[i].vx * DeltaT;
       P[i].y  += P[i].vy * DeltaT;
@@ -100,7 +111,7 @@ int main(int argc, char * argv[])
       P[i].vy += ((G * P[i].fy) / P[i].m) * DeltaT; 
       P[i].fx = P[i].fy = 0.0;  // reset forces for next time step
     }
-
+   }/* End Parallel */
   } /* k */
 
   t2 = omp_get_wtime();

@@ -51,7 +51,7 @@ int main(int argc, char * argv[])
    */
  #pragma omp parallel shared(P) private(i)
 	{
-	   #pragma omp for schedule(static,10)
+	   #pragma omp for schedule(guided)
 	  for (i = 0; i < n; i++) {
 	    P[i].x = P[i].y = (double) i / (double) n;
 	    P[i].m = 1.0;
@@ -65,11 +65,11 @@ int main(int argc, char * argv[])
    *  n-body simulation for nts steps
    */
 t1 = omp_get_wtime();
+for (k = 1; k <= nts; k++) {
  #pragma omp parallel shared(P) private(k,i,j)
 	{
-	   #pragma omp for //schedule(static,10)
-	  for (k = 1; k <= nts; k++) {
 
+	   #pragma omp for schedule(guided)
 	    for (i = 0; i < n; i++) {
 
 	      /*  force accumulator for body i
@@ -100,18 +100,20 @@ t1 = omp_get_wtime();
 	      P[i].ay = fy / P[i].m;
 
 	    }/* for i */
-
-	    /* update velocities and positions 
-	     */
-	    for (i = 0; i < n; i++) {
-	      P[i].x  += P[i].vx * DeltaT;
-	      P[i].y  += P[i].vy * DeltaT;
-	      P[i].vx += P[i].ax * DeltaT; 
-	      P[i].vy += P[i].ay * DeltaT; 
-	    }
-
-	  } /* for k */
-	}/*End parallel*/
+	 }/*End parallel*/
+    /* update velocities and positions 
+     */
+ #pragma omp parallel shared(P) private(k,i,j)
+	{
+	   #pragma omp for schedule(guided)
+    for (i = 0; i < n; i++) {
+      P[i].x  += P[i].vx * DeltaT;
+      P[i].y  += P[i].vy * DeltaT;
+      P[i].vx += P[i].ax * DeltaT; 
+      P[i].vy += P[i].ay * DeltaT; 
+    }
+   }/*End parallel*/
+ } /* for k */
   t2 = omp_get_wtime();
 
   /* report result in units of millions of interactions per second 
