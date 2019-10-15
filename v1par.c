@@ -66,7 +66,7 @@ int main(int argc, char * argv[])
    */
 t1 = omp_get_wtime();
 for (k = 1; k <= nts; k++) {
- #pragma omp parallel shared(P) private(k,i,j)
+ #pragma omp parallel shared(P, k) private(i,j)
 	{
 
 	   #pragma omp for schedule(guided)
@@ -103,7 +103,7 @@ for (k = 1; k <= nts; k++) {
 	 }/*End parallel*/
     /* update velocities and positions 
      */
- #pragma omp parallel shared(P) private(k,i,j)
+ #pragma omp parallel shared(P) private(i)
 	{
 	   #pragma omp for schedule(guided)
     for (i = 0; i < n; i++) {

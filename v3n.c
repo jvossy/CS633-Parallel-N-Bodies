@@ -28,7 +28,7 @@ static struct Body     P[NMAX];
 
 double G      = 6.673E-11;
 double DeltaT = 0.001;
-int    nts    = 4; 
+int    nts    = 6; 
 int    n;
 
 
@@ -111,10 +111,12 @@ int main(int argc, char * argv[])
     double interactions = nts * (double) n * (double) n;
     double dt = t2 - t1;
     printf("   %.5g \n", 1E-6 * interactions / dt); 
-    printf("   %lf, %lf", P[0].x, P[0].y);
-    printf("   %lf, %lf", P[1].x, P[1].y);
   }
-
+  FILE *f = fopen("v3nstate.data", "wb");
+  for (i = 0; i < n; i++) {
+    fprintf(f, "x: %.20f, y: %.20f\n", P[i].x, P[i].y); 
+  }
+  fclose(f);
 } 
 
 
