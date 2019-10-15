@@ -84,17 +84,24 @@ int main(int argc, char * argv[])
         c  = P[j].m * P[i].m / (d2 * sqrt(d2));           
         Fx += c * rx;              
         Fy += c * ry;  
+<<<<<<< HEAD
         #pragma omp atomic
         P[j].fx -= c * rx;  // reciprocal interaction
         #pragma omp atomic
+=======
+        #pragma omp atomic 
+        P[j].fx -= c * rx;  // reciprocal interaction
+        #pragma omp atomic 
+>>>>>>> 78740f9a34447983ecc4e6f9fe937f7ffe251f06
         P[j].fy -= c * ry;             
 
         } /* j */
 	//Lock P[i]
-      #pragma omp atomic
-      P[i].fx +=  Fx;
 
-      #pragma omp atomic
+      #pragma omp atomic 
+      P[i].fx +=  Fx;
+      
+      #pragma omp atomic 
       P[i].fy +=  Fy;
 	//Unlock P[i]
     } /* i */
