@@ -60,8 +60,11 @@ int main(int argc, char * argv[])
    *  n-body simulation for nts steps
    */
   t1 = omp_get_wtime();
-  for (k = 1; k <= nts; k++) {
 
+  for (k = 1; k <= nts; k++) {
+ #pragma omp parallel shared(P) private(i, j)
+   {
+   #pragma omp for schedule(guided)
     for (i = 0; i < n; i++) {
 
       double Fx = 0.0, Fy = 0.0;
@@ -85,14 +88,17 @@ int main(int argc, char * argv[])
 	  P[j].fy -= c * ry;             
 
       } /* j */
-
+	//Lock P[i]
       P[i].fx +=  Fx;
       P[i].fy +=  Fy;
-
+	//Unlock P[i]
     } /* i */
-
+   }/* End Parallel */
     /* advance velocities and positions 
      */
+ #pragma omp parallel shared(P) private(i, j)
+   {
+   #pragma omp for schedule(guided)
     for (i = 0; i < n; i++) {
       P[i].x  += P[i].vx * DeltaT;
       P[i].y  += P[i].vy * DeltaT;
@@ -100,7 +106,7 @@ int main(int argc, char * argv[])
       P[i].vy += ((G * P[i].fy) / P[i].m) * DeltaT; 
       P[i].fx = P[i].fy = 0.0;  // reset forces for next time step
     }
-
+   }/* End Parallel */
   } /* k */
 
   t2 = omp_get_wtime();
