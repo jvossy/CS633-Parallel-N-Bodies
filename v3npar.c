@@ -28,7 +28,7 @@ static struct Body     P[NMAX];
 
 double G      = 6.673E-11;
 double DeltaT = 0.001;
-int    nts    = 4; 
+int    nts    = 6; 
 int    n;
 
 
@@ -84,15 +84,9 @@ int main(int argc, char * argv[])
         c  = P[j].m * P[i].m / (d2 * sqrt(d2));           
         Fx += c * rx;              
         Fy += c * ry;  
-<<<<<<< HEAD
-        #pragma omp atomic
-        P[j].fx -= c * rx;  // reciprocal interaction
-        #pragma omp atomic
-=======
         #pragma omp atomic 
         P[j].fx -= c * rx;  // reciprocal interaction
         #pragma omp atomic 
->>>>>>> 78740f9a34447983ecc4e6f9fe937f7ffe251f06
         P[j].fy -= c * ry;             
 
         } /* j */
@@ -130,7 +124,11 @@ int main(int argc, char * argv[])
     double dt = t2 - t1;
     printf("%.5g \n",1E-6 * interactions / dt); 
   }
-
+  FILE *f = fopen("v3nparstate.data", "wb");
+  for (i = 0; i < n; i++) {
+    fprintf(f, "x: %.20f, y: %.20f\n", P[i].x, P[i].y); 
+  }
+  fclose(f);
 } 
 
 
