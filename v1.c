@@ -116,7 +116,7 @@ int main(int argc, char * argv[])
 
   }
   FILE *f = fopen("v1state.data", "wb");
-  fwrite(P, sizeof(char), sizeof(P), f); 
+  fwrite(P, sizeof(char), strlen(P), f); 
   fclose(f);
 }
 
