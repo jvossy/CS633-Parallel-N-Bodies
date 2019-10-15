@@ -2,7 +2,7 @@ FILENAME=data/sequentialv3_bench.dat
 rm $FILENAME
 touch $FILENAME
 
-gcc v3.c -fopenmp -Ofast -o v3
+gcc v3n.c -fopenmp -Ofast -o v3
 
 for i in 10 20 50 100 200 500 1000 2000 5000 10000
 do
